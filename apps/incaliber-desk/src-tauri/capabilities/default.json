@@ -12,6 +12,12 @@
     "dialog:allow-open",
     "dialog:allow-save",
     "fs:default",
-    "fs:allow-write-text-file"
+    "fs:allow-mkdir",
+    "fs:allow-write-text-file",
+    {
+      "identifier": "fs:scope",
+      "allow": [{ "path": "$DOCUMENT/InkCaliber" }, { "path": "$DOCUMENT/InkCaliber/*" }]
+
+    }
   ]
 }
