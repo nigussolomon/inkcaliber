@@ -2,6 +2,9 @@
   "name": "inkcaliber",
   "version": "1.0.0",
   "private": true,
+  "scripts": {
+    "inkcaliber-desk:dev": "yarn workspace inkcaliber-desk tauri dev"
+  },
   "workspaces": [
     "apps/*",
     "packages/*"

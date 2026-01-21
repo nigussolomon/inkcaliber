@@ -2,5 +2,5 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 fn main() {
-    incaliber_desk_lib::run()
+    inkcaliber_desk_lib::run()
 }

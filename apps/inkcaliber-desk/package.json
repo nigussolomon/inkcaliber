@@ -1,5 +1,5 @@
 {
-  "name": "incaliber-desk",
+  "name": "inkcaliber-desk",
   "private": true,
   "version": "0.1.0",
   "type": "module",
@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "@excalidraw/excalidraw": "^0.18.0",
+    "@hugeicons/core-free-icons": "^3.1.1",
+    "@hugeicons/react": "^1.1.4",
     "@mantine/carousel": "^8.3.13",
     "@mantine/charts": "^8.3.13",
     "@mantine/code-highlight": "^8.3.13",

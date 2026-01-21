@@ -20,9 +20,11 @@ export const getStoredTheme = (): Theme => {
 
 export const setStoredTheme = (theme: ThemeColor) => {
   localStorage.setItem("theme", theme);
+  window.location.reload();
 };
 
 export const setStoredBgColor = (bgColor: string | undefined) => {
   if(bgColor === undefined) return;
   localStorage.setItem("bgColor", bgColor);
+  window.location.reload();
 };

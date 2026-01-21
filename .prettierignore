@@ -1,0 +1,44 @@
+# Artifacts and build output
+dist
+dist-*
+target
+out
+build
+bin
+*.lproj
+
+# Dependencies
+node_modules
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Tauri specific
+src-tauri/target
+src-tauri/gen
+src-tauri/capabilities/schemas
+
+# User Data / InkCaliber Workspace
+# We ignore these because they are auto-generated JSON or binary images
+InkCaliber/
+.trash/
+
+# Static Assets
+public/
+*.png
+*.jpg
+*.jpeg
+*.svg
+*.pdf
+*.ico
+
+# Configs & Environment
+.env
+.env.*
+.gitignore
+.prettierignore
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

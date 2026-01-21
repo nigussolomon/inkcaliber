@@ -13,15 +13,16 @@
     "dialog:allow-save",
     "fs:default",
     "fs:allow-mkdir",
+    "fs:allow-write-file",
     "fs:allow-write-text-file",
     "fs:allow-read-text-file",
     "fs:allow-read-dir",
     "fs:allow-remove",
     "fs:allow-stat",
-    "fs:deny-rename",
+    "fs:allow-rename",
     {
       "identifier": "fs:scope",
-      "allow": [{ "path": "$DOCUMENT/InkCaliber" }, { "path": "$DOCUMENT/InkCaliber/*" }]
+      "allow": [{ "path": "$DOCUMENT/InkCaliber" }, { "path": "$DOCUMENT/InkCaliber/**" }, { "path": "$DOCUMENT/InkCaliber/.trash" }, { "path": "$DOCUMENT/InkCaliber/.trash/**" }]
 
     }
   ]
