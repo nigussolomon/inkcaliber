@@ -7,7 +7,8 @@ import {
   DashboardSquare01FreeIcons,
   ArrowRight01FreeIcons,
   MoonFreeIcons,
-  SunFreeIcons
+  SunFreeIcons,
+  AiChat01FreeIcons
 } from "@hugeicons/core-free-icons";
 import { getStoredTheme, setStoredTheme } from "../theme";
 
@@ -30,10 +31,17 @@ export default function LandingPage() {
       color: "blue",
       path: "/notes",
     },
+    {
+      title: "Chat",
+      description: "AI-powered brainstorming assistant.",
+      icon: AiChat01FreeIcons,
+      color: "green",
+      path: "/chat",
+    },
   ];
 
   return (
-    <Container size="sm" style={{ height: "100vh", display: "flex", flexDirection: "column", justifyContent: "center", position: "relative" }}>
+    <Container size="md" style={{ height: "100vh", display: "flex", flexDirection: "column", justifyContent: "center", position: "relative" }}>
       
       <ActionIcon 
         style={{ position: "absolute", top: 20, right: 20 }} 
@@ -54,7 +62,7 @@ export default function LandingPage() {
           <Text c="dimmed" size="lg">Select an application to start</Text>
         </Stack>
 
-        <SimpleGrid cols={2} spacing="lg">
+        <SimpleGrid cols={3} spacing="lg">
           {apps.map((app) => (
             <UnstyledButton key={app.title} onClick={() => navigate(app.path)}>
               <Card shadow="sm" padding="xl" radius="md" withBorder style={{ height: '100%', transition: 'transform 0.2s, box-shadow 0.2s' }} 

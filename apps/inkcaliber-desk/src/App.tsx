@@ -5,6 +5,10 @@ import FileGallery from "./pages/diagrams";
 import LandingPage from "./pages/landing";
 import NotesGallery from "./pages/notes";
 import NoteEditor from "./pages/notes/active";
+import ChatGallery from "./pages/chat";
+import ActiveChat from "./pages/chat/active";
+import ProviderSelect from "./pages/chat/provider-select";
+import ChatSettings from "./pages/chat/settings";
 
 const router = createBrowserRouter([
   {
@@ -26,6 +30,22 @@ const router = createBrowserRouter([
   {
     path: "/notes/active",
     element: <NoteEditor/>
+  },
+  {
+    path: "/chat",
+    element: <ProviderSelect/>
+  },
+  {
+    path: "/chat/settings",
+    element: <ChatSettings/>
+  },
+  {
+    path: "/chat/:provider",
+    element: <ChatGallery/>
+  },
+  {
+    path: "/chat/:provider/active",
+    element: <ActiveChat/>
   }
 ]);
 
