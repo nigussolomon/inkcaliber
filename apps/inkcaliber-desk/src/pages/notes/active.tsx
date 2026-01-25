@@ -2,10 +2,10 @@ import { useState, useEffect, useRef } from "react";
 import { useEditor } from "@tiptap/react";
 import { RichTextEditor, Link, } from "@mantine/tiptap";
 import { useSearchParams, useNavigate } from "react-router";
-import { writeTextFile, readTextFile, mkdir, BaseDirectory, rename, stat } from "@tauri-apps/plugin-fs";
-import { TextInput, Group, Box, ActionIcon, Tooltip, Stack, Paper, Menu, Portal, Divider } from "@mantine/core";
+import { writeTextFile, readTextFile, mkdir, BaseDirectory, rename, stat, readDir } from "@tauri-apps/plugin-fs";
+import { TextInput, Group, Box, ActionIcon, Tooltip, Stack, Paper, Menu, Portal, Divider, Modal, Button, Text, SimpleGrid, Card } from "@mantine/core";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { ArrowLeft01FreeIcons, FloppyDiskFreeIcons, Loading01FreeIcons, AlertCircle, Copy01FreeIcons, Scissor01FreeIcons, ClipboardFreeIcons, TextBoldFreeIcons, TextItalicFreeIcons, EraserFreeIcons } from "@hugeicons/core-free-icons";
+import { ArrowLeft01FreeIcons, FloppyDiskFreeIcons, Loading01FreeIcons, AlertCircle, Copy01FreeIcons, Scissor01FreeIcons, ClipboardFreeIcons, TextBoldFreeIcons, TextItalicFreeIcons, EraserFreeIcons, SquareFreeIcons, Link01FreeIcons, Cancel01FreeIcons, Search01FreeIcons } from "@hugeicons/core-free-icons";
 import { Shell } from "../../components/shell";
 import { getStoredTheme, setStoredTheme } from "../../theme";
 import StarterKit from '@tiptap/starter-kit';
@@ -26,6 +26,12 @@ export default function NoteEditor() {
   const folder = "InkCaliber/notes";
   const [theme, setTheme] = useState(getStoredTheme().theme);
 
+  // Diagram linking state
+  const [diagramModalOpened, setDiagramModalOpened] = useState(false);
+  const [availableDiagrams, setAvailableDiagrams] = useState<any[]>([]);
+  const [diagramSearch, setDiagramSearch] = useState("");
+
+
   // Refs for async access to avoid stale closures
   const fileNameRef = useRef(fileName);
   const originalFileNameRef = useRef(originalFileName);
@@ -40,9 +46,23 @@ export default function NoteEditor() {
 
   const editor = useEditor({
       shouldRerenderOnTransaction: true,
+      editorProps: {
+        handleDOMEvents: {
+            click: (view, event) => {
+                const target = event.target as HTMLElement;
+                const link = target.closest('a');
+                if (link && link.getAttribute('href')?.startsWith('/diagrams/')) {
+                    event.preventDefault();
+                    navigate(link.getAttribute('href') || "");
+                    return true;
+                }
+                return false;
+            }
+        }
+      },
       extensions: [
         StarterKit.configure({ link: false }),
-        Link,
+        Link.configure({ openOnClick: false }),
         Superscript,
         SubScript,
         Highlight,
@@ -158,6 +178,44 @@ export default function NoteEditor() {
     return () => window.removeEventListener("click", handleClick);
   }, []);
 
+  const loadDiagrams = async () => {
+      try {
+          const diagramsFolder = "InkCaliber/diagrams";
+          await mkdir(diagramsFolder, { baseDir: BaseDirectory.Document, recursive: true });
+          const entries = await readDir(diagramsFolder, { baseDir: BaseDirectory.Document });
+          const diags = entries.filter(e => e.isDirectory).map(e => e.name);
+          setAvailableDiagrams(diags);
+      } catch (e) {
+          console.error("Failed to load diagrams", e);
+      }
+  };
+
+  const openDiagramModal = () => {
+      loadDiagrams();
+      setDiagramModalOpened(true);
+  };
+
+  const insertDiagramLink = (diagramName: string) => {
+      if (!editor) return;
+      const href = `/diagrams/active?file=${encodeURIComponent(diagramName)}`;
+      const text = `Diagram: ${diagramName}`;
+      
+      editor.chain().focus()
+        .insertContent({
+            type: 'text',
+            text: text,
+            marks: [
+                {
+                    type: 'link',
+                    attrs: { href },
+                }
+            ]
+        })
+        .insertContent(" ") // Add space after link
+        .run();
+        
+      setDiagramModalOpened(false);
+  };
 
 
   return (
@@ -224,6 +282,14 @@ export default function NoteEditor() {
                         <RichTextEditor.ControlsGroup>
                           <RichTextEditor.Link />
                           <RichTextEditor.Unlink />
+                        </RichTextEditor.ControlsGroup>
+
+                        <RichTextEditor.ControlsGroup>
+                            <Tooltip label="Insert Diagram Link">
+                                <ActionIcon variant="default" size="sm" onClick={openDiagramModal}>
+                                    <HugeiconsIcon icon={Link01FreeIcons} size={14} />
+                                </ActionIcon>
+                            </Tooltip>
                         </RichTextEditor.ControlsGroup>
 
                         <RichTextEditor.ControlsGroup>
@@ -300,6 +366,25 @@ export default function NoteEditor() {
                 </Menu.Dropdown>
             </Menu>
         </Portal>
+
+        <Modal opened={diagramModalOpened} onClose={() => setDiagramModalOpened(false)} title="Insert Diagram Link" centered>
+            <Stack>
+                {availableDiagrams.length === 0 ? (
+                    <Text c="dimmed">No diagrams found.</Text>
+                ) : (
+                    <SimpleGrid cols={2}>
+                        {availableDiagrams.map(diag => (
+                            <Card key={diag} withBorder shadow="sm" radius="md" p="md" onClick={() => insertDiagramLink(diag)} style={{ cursor: 'pointer', hover: { backgroundColor: 'var(--mantine-color-gray-0)' } }}>
+                                <Group wrap="nowrap">
+                                    <HugeiconsIcon icon={SquareFreeIcons} size={20} />
+                                    <Text truncate>{diag}</Text>
+                                </Group>
+                            </Card>
+                        ))}
+                    </SimpleGrid>
+                )}
+            </Stack>
+        </Modal>
     </Shell>
   );
 }
