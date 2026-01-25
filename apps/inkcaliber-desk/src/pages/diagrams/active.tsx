@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { Excalidraw, exportToBlob, serializeAsJSON, WelcomeScreen } from "@excalidraw/excalidraw";
 import { writeTextFile, readTextFile, mkdir, BaseDirectory, writeFile, readDir, remove } from "@tauri-apps/plugin-fs";
 import { useSearchParams, useNavigate } from "react-router";
-import { getStoredTheme, setStoredBgColor, setStoredTheme, Theme } from "../theme";
+import { getStoredTheme, setStoredBgColor, setStoredTheme, Theme } from "../../theme";
 import "@excalidraw/excalidraw/index.css";
 import { OrderedExcalidrawElement } from "@excalidraw/excalidraw/element/types";
 import { Button, TextInput, Modal, Stack, Text, Menu, ScrollArea, Box, ActionIcon, Tooltip, Indicator, Group } from "@mantine/core";
@@ -18,7 +18,7 @@ import {
   FloppyDiskFreeIcons,
   Loading01FreeIcons
 } from "@hugeicons/core-free-icons";
-import { Shell } from "../components/shell";
+import { Shell } from "../../components/shell";
 
 type SyncStatus = "saved" | "syncing" | "error" | "loading";
 
@@ -48,7 +48,7 @@ function ActiveSessionComp({ setSync, setBranches, currentBranch }: any) {
       return;
     }
     try {
-      const entries = await readDir(`InkCaliber/${sessionFolderRef.current}`, { baseDir: BaseDirectory.Document });
+      const entries = await readDir(`InkCaliber/diagrams/${sessionFolderRef.current}`, { baseDir: BaseDirectory.Document });
       const branches = entries
         .filter(e => e.name.endsWith(".excalidraw"))
         .map(e => ({
@@ -70,7 +70,7 @@ function ActiveSessionComp({ setSync, setBranches, currentBranch }: any) {
       }
       try {
         setSync("loading");
-        const filePath = `InkCaliber/${initialFile}/${currentBranch}.excalidraw`;
+        const filePath = `InkCaliber/diagrams/${initialFile}/${currentBranch}.excalidraw`;
         const content = await readTextFile(filePath, { baseDir: BaseDirectory.Document });
         const data = JSON.parse(content);
 
@@ -106,7 +106,7 @@ function ActiveSessionComp({ setSync, setBranches, currentBranch }: any) {
         sessionFolderRef.current = `session-${timestamp}`;
         setSearchParams({ file: sessionFolderRef.current, branch: targetBranch });
       }
-      const basePath = `InkCaliber/${sessionFolderRef.current}`;
+      const basePath = `InkCaliber/diagrams/${sessionFolderRef.current}`;
       await mkdir(basePath, { baseDir: BaseDirectory.Document, recursive: true });
       const json = serializeAsJSON(elements, appState, {}, "local");
       await writeTextFile(`${basePath}/${targetBranch}.excalidraw`, json, { baseDir: BaseDirectory.Document });
@@ -194,7 +194,7 @@ export default function ActiveSession() {
     if (branchName === "data") return;
     if (!window.confirm(`Delete version "${formatBranchName(branchName)}"?`)) return;
     try {
-      await remove(`InkCaliber/${sessionFile}/${branchName}.excalidraw`, { baseDir: BaseDirectory.Document });
+      await remove(`InkCaliber/diagrams/${sessionFile}/${branchName}.excalidraw`, { baseDir: BaseDirectory.Document });
       if ((window as any).refreshBranches) (window as any).refreshBranches();
     } catch (err) { console.error(err); }
   };
@@ -204,7 +204,7 @@ export default function ActiveSession() {
   return (
     <Shell menus={
       <Stack align='center' gap="md">
-        <Tooltip label="Home" position="right"><ActionIcon size="xl" color="gray" variant="subtle" radius="md" onClick={() => navigate('/')}><HugeiconsIcon icon={Home02FreeIcons}/></ActionIcon></Tooltip>
+        <Tooltip label="Home" position="right"><ActionIcon size="xl" color="gray" variant="subtle" radius="md" onClick={() => navigate('/diagrams')}><HugeiconsIcon icon={Home02FreeIcons}/></ActionIcon></Tooltip>
 
         <Box style={{ width: '60%', height: '1px', backgroundColor: 'var(--mantine-color-gray-3)' }} />
 

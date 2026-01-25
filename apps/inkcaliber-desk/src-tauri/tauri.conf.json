@@ -24,6 +24,8 @@
             "$PICTURE/**",
             "$DOCUMENT/**",
             "$DOCUMENT/InkCaliber/**",
+            "$DOCUMENT/InkCaliber/diagrams/**",
+            "$DOCUMENT/InkCaliber/notes/**",
             "$DOCUMENT/InkCaliber/.trash/**",
             "$HOME/**"
           ]

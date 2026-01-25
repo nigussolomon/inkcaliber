@@ -3,10 +3,10 @@ import { readDir, remove, rename, BaseDirectory, stat, mkdir } from "@tauri-apps
 import { useNavigate } from "react-router";
 import { ActionIcon, Box, Button, Card, Flex, SimpleGrid, Stack, Text, Title, TextInput, Select, Modal, Group, Image, Center, Loader, Tooltip, Divider } from "@mantine/core";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { ArrangeFreeIcons, ArrowTurnBackwardFreeIcons, MoonFreeIcons, PencilEdit01FreeIcons, Plus, Search01FreeIcons, SunFreeIcons, Trash2 } from "@hugeicons/core-free-icons";
+import { ArrangeFreeIcons, ArrowTurnBackwardFreeIcons, Home02FreeIcons, MoonFreeIcons, PencilEdit01FreeIcons, Plus, Search01FreeIcons, SunFreeIcons, Trash2 } from "@hugeicons/core-free-icons";
 import { convertFileSrc } from "@tauri-apps/api/core";
 import { documentDir } from "@tauri-apps/api/path";
-import { getStoredTheme, setStoredTheme } from "../theme";
+import { getStoredTheme, setStoredTheme } from "../../theme";
 
 export default function FileGallery() {
   const [theme, setTheme] = useState(getStoredTheme().theme);
@@ -21,8 +21,8 @@ export default function FileGallery() {
   const [renamingFile, setRenamingFile] = useState<{ oldName: string; newName: string } | null>(null);
 
   const navigate = useNavigate();
-  const folder = "InkCaliber";
-  const trashFolder = "InkCaliber/.trash";
+  const folder = "InkCaliber/diagrams";
+  const trashFolder = "InkCaliber/.trash/diagrams";
 
   useEffect(() => {
     documentDir().then(setDocPath);
@@ -31,7 +31,8 @@ export default function FileGallery() {
 
   const setupAndLoad = async () => {
     try {
-      // Ensure trash directory exists
+      // Ensure directories
+      await mkdir(folder, { baseDir: BaseDirectory.Document, recursive: true });
       await mkdir(trashFolder, { baseDir: BaseDirectory.Document, recursive: true });
       loadSessions();
     } catch (e) {
@@ -45,7 +46,7 @@ export default function FileGallery() {
       const entries = await readDir(folder, { baseDir: BaseDirectory.Document });
 
       const fetchStats = async (items: any[], pathPrefix: string) => {
-        return Promise.all(items.filter(e => e.isDirectory && e.name !== ".trash").map(async (entry) => {
+        return Promise.all(items.filter(e => e.isDirectory).map(async (entry) => {
           try {
             const fileStat = await stat(`${pathPrefix}/${entry.name}/data.excalidraw`, { baseDir: BaseDirectory.Document });
             return { name: entry.name, mtime: fileStat.mtime || new Date(0) };
@@ -154,9 +155,12 @@ export default function FileGallery() {
     <Box p="xl">
       <Flex align="center" justify="space-between" wrap="wrap" gap="md" mb="lg">
         <Stack gap={0}>
-          <Title>{showTrash ? "Trash Bin" : "InkCaliber Gallery"}</Title>
-          <Text size="xs" c="dimmed">
-            {showTrash ? "Manage deleted sessions. You can restore them or wipe them forever." : "Explore and manage your drawings effortlessly."}
+             <Group gap="xs">
+                 <ActionIcon variant="subtle" color="gray" onClick={() => navigate('/')}><HugeiconsIcon icon={Home02FreeIcons} size={24} /></ActionIcon>
+                 <Title>{showTrash ? "Trash Bin" : "Diagrams"}</Title>
+            </Group>
+          <Text size="xs" c="dimmed" pl="xl">
+            {showTrash ? "Manage deleted sessions." : "Explore and manage your drawings effortlessly."}
           </Text>
         </Stack>
 
@@ -172,7 +176,7 @@ export default function FileGallery() {
           </Button>
 
           {!showTrash && (
-            <Button radius="md" onClick={() => navigate("/active")} variant="default" color="violet" rightSection={<HugeiconsIcon icon={Plus} size={16} />}>
+            <Button radius="md" onClick={() => navigate("/diagrams/active")} variant="default" color="violet" rightSection={<HugeiconsIcon icon={Plus} size={16} />}>
                 <Text size="xs" fw={900}>New Drawing</Text>
             </Button>
           )}
@@ -223,7 +227,7 @@ export default function FileGallery() {
                   )}
                 </Group>
 
-                <Card.Section  onClick={() => !showTrash && navigate(`/active?file=${encodeURIComponent(session.name)}`)} style={{ cursor: showTrash ? 'default' : 'pointer' }}>
+                <Card.Section  onClick={() => !showTrash && navigate(`/diagrams/active?file=${encodeURIComponent(session.name)}`)} style={{ cursor: showTrash ? 'default' : 'pointer' }}>
                   <Box bg="gray.0" w="100%" h={180} style={{ borderRadius: '8px', overflow: 'hidden' }}>
                     <Image w="100%" src={previewUrl} fallbackSrc="https://placehold.co/400x300?text=No+Preview" fit="cover" />
                   </Box>
