@@ -1,5 +1,6 @@
 import '@mantine/core/styles.css';
 import '@mantine/tiptap/styles.css';
+import '@mantine/code-highlight/styles.css';
 import "./index.css";
 import { MantineProvider } from '@mantine/core'
 import ReactDOM from "react-dom/client";

@@ -30,36 +30,73 @@ export class GeminiService implements AIService {
 
   async sendMessage(message: string, history: Message[], systemPrompt?: string): Promise<string> {
     try {
-      const model = this.genAI.getGenerativeModel({ model: this.model });
+      // Robust system instruction handling
+      const model = this.genAI.getGenerativeModel({ 
+        model: this.model,
+        systemInstruction: systemPrompt ? systemPrompt : undefined
+      });
 
-      // Convert our message format to Gemini's format
-      const geminiHistory = history.map(msg => ({
+      // Sanitize history to ensure alternating user/model roles
+      // Gemini throws errors if roles don't strictly alternate
+      const sanitizedHistory = this.sanitizeHistory(history);
+
+      const geminiHistory = sanitizedHistory.map(msg => ({
         role: msg.role === "assistant" ? "model" : "user",
         parts: [{ text: msg.content }]
       }));
 
-      // Start chat with history
+      // console.log("Sending Gemini request with history length:", geminiHistory.length);
+
       const chat = model.startChat({
         history: geminiHistory,
         generationConfig: {
-          maxOutputTokens: 2048,
-          temperature: 0.9,
+          maxOutputTokens: 8192,
+          temperature: 0.7,
+          topP: 0.95,
+          topK: 40,
         },
       });
 
-      // Add system prompt as first user message if provided and history is empty
-      let finalMessage = message;
-      if (systemPrompt && history.length === 0) {
-        finalMessage = `${systemPrompt}\n\nUser: ${message}`;
-      }
-
-      const result = await chat.sendMessage(finalMessage);
+      const result = await chat.sendMessage(message);
       const response = await result.response;
       return response.text();
     } catch (error: any) {
       console.error("Gemini API Error:", error);
       throw new Error(`Gemini API Error: ${error.message || "Unknown error"}`);
     }
+  }
+
+  private sanitizeHistory(history: Message[]): Message[] {
+    if (history.length === 0) return [];
+    
+    const sanitized: Message[] = [];
+    let lastRole: string | null = null;
+    
+    for (const msg of history) {
+      // Ignore empty messages
+      if (!msg.content.trim()) continue;
+      
+      // If the role is the same as the last one, combine them or skip
+      // Gemini expects: user, model, user, model...
+      if (msg.role === lastRole) {
+        const lastMsg = sanitized[sanitized.length - 1];
+        lastMsg.content += "\n\n" + msg.content;
+      } else {
+        sanitized.push({ ...msg });
+        lastRole = msg.role;
+      }
+    }
+    
+    // History must NOT end with a user message if we are about to send ANOTHER user message
+    // gemini.startChat with history followed by sendMessage(user_msg) 
+    // expects model to be the last role in history (or history to be empty)
+    if (sanitized.length > 0 && sanitized[sanitized.length - 1].role === "user") {
+        // Technically gemini-pro handles this sessionally but startChat history 
+        // usually expects model as last role if history is provided
+        // Let's just pass it as is and let the SDK handle the current message as the next 'user' part
+    }
+    
+    return sanitized;
   }
 
   async streamMessage(
@@ -69,9 +106,13 @@ export class GeminiService implements AIService {
     systemPrompt?: string
   ): Promise<void> {
     try {
-      const model = this.genAI.getGenerativeModel({ model: this.model });
+      const model = this.genAI.getGenerativeModel({ 
+        model: this.model,
+        systemInstruction: systemPrompt ? systemPrompt : undefined
+      });
 
-      const geminiHistory = history.map(msg => ({
+      const sanitizedHistory = this.sanitizeHistory(history);
+      const geminiHistory = sanitizedHistory.map(msg => ({
         role: msg.role === "assistant" ? "model" : "user",
         parts: [{ text: msg.content }]
       }));
@@ -79,17 +120,12 @@ export class GeminiService implements AIService {
       const chat = model.startChat({
         history: geminiHistory,
         generationConfig: {
-          maxOutputTokens: 2048,
-          temperature: 0.9,
+          maxOutputTokens: 8192,
+          temperature: 0.7,
         },
       });
 
-      let finalMessage = message;
-      if (systemPrompt && history.length === 0) {
-        finalMessage = `${systemPrompt}\n\nUser: ${message}`;
-      }
-
-      const result = await chat.sendMessageStream(finalMessage);
+      const result = await chat.sendMessageStream(message);
       
       for await (const chunk of result.stream) {
         const chunkText = chunk.text();

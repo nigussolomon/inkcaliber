@@ -4,7 +4,7 @@ import { useNavigate, useParams } from "react-router";
 import { AIProvider } from "../../services/ai-service";
 import { ActionIcon, Box, Button, Card, Flex, SimpleGrid, Stack, Text, Title, TextInput, Select, Modal, Group, Center, Loader, Tooltip, Divider } from "@mantine/core";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { ArrangeFreeIcons, ArrowTurnBackwardFreeIcons, MoonFreeIcons, PencilEdit01FreeIcons, Plus, Search01FreeIcons, SunFreeIcons, Trash2, AiChat01FreeIcons, ArrowLeft01FreeIcons } from "@hugeicons/core-free-icons";
+import { ArrangeFreeIcons, ArrowTurnBackwardFreeIcons, MoonFreeIcons, PencilEdit01FreeIcons, Plus, Search01FreeIcons, SunFreeIcons, Trash2, AiChat01FreeIcons, ArrowLeft01FreeIcons, Settings02FreeIcons } from "@hugeicons/core-free-icons";
 
 import { getStoredTheme, setStoredTheme } from "../../theme";
 
@@ -225,9 +225,14 @@ export default function ChatGallery() {
           </Button>
 
           {!showTrash && (
-            <Button radius="md" onClick={handleCreateNewChat} variant="default" color="green" rightSection={<HugeiconsIcon icon={Plus} size={16} />}>
-                <Text size="xs" fw={900}>New Chat</Text>
-            </Button>
+            <Group gap="xs">
+                <Button radius="md" variant="light" color="violet" onClick={() => navigate(`/chat/${provider}/prompts`)} rightSection={<HugeiconsIcon icon={Settings02FreeIcons} size={16} />}>
+                    <Text size="xs" fw={900}>Manage Prompts</Text>
+                </Button>
+                <Button radius="md" onClick={handleCreateNewChat} variant="default" color="green" rightSection={<HugeiconsIcon icon={Plus} size={16} />}>
+                    <Text size="xs" fw={900}>New Chat</Text>
+                </Button>
+            </Group>
           )}
 
            <ActionIcon radius="md" size="lg" onClick={() => { setTheme(theme == "dark" ? "light" : "dark"); setStoredTheme(theme == "dark" ? "light" : "dark") }} color={theme === "dark" ? "white" : "black"} variant={theme === "dark" ? "white" : "filled"}>

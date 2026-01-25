@@ -9,6 +9,7 @@ import ChatGallery from "./pages/chat";
 import ActiveChat from "./pages/chat/active";
 import ProviderSelect from "./pages/chat/provider-select";
 import ChatSettings from "./pages/chat/settings";
+import PromptManagement from "./pages/chat/prompts";
 
 const router = createBrowserRouter([
   {
@@ -38,6 +39,10 @@ const router = createBrowserRouter([
   {
     path: "/chat/settings",
     element: <ChatSettings/>
+  },
+  {
+    path: "/chat/:provider/prompts",
+    element: <PromptManagement/>
   },
   {
     path: "/chat/:provider",
